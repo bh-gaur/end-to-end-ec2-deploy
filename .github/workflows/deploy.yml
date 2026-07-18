@@ -52,7 +52,7 @@ jobs: # jobs section contain multiple jobs that run in parallel
       - name: Testing complete
         run: echo "✅ All Tests Passed ✅, deploying to EC2"
 
-  Build-image:
+  Build-and-scan-image:
     needs: Testing-complete
     runs-on: ubuntu-latest
     steps:
@@ -65,7 +65,6 @@ jobs: # jobs section contain multiple jobs that run in parallel
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_TOKEN }}
 
-    ### Build Docker Image ###
       - name: Build docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
@@ -76,13 +75,6 @@ jobs: # jobs section contain multiple jobs that run in parallel
           tags: ${{ env.DOCKERHUB_USERNAME }}/todo-streamlit-app:${{ env.IMAGE_TAG }}
           build-args: |
             TestEnv=Dev
-      
-  Image-scan:
-    runs-on: ubuntu-latest
-    needs: Build-image
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
 
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@v0.36.0
