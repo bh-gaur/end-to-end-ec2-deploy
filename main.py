@@ -5,6 +5,7 @@ import csv
 # Define the path to the CSV file
 CSV_FILE = "tasks.csv"
 
+
 def load_tasks():
     """
     Load the tasks from the CSV file.
@@ -23,6 +24,7 @@ def load_tasks():
     except FileNotFoundError:
         return []
 
+
 def save_tasks(task_list):
     """
     Save the tasks to the CSV file.
@@ -32,6 +34,7 @@ def save_tasks(task_list):
         writer = csv.writer(f)
         writer.writerows([[t["task"], t["status"]] for t in task_list])
 
+
 # Callbacks for managing state cleanly without manual reruns
 def toggle_task(idx):
     tasks = load_tasks()
@@ -40,11 +43,13 @@ def toggle_task(idx):
         tasks[idx]["status"] = "Completed" if current_status == "Pending" else "Pending"
         save_tasks(tasks)
 
+
 def delete_task(idx):
     tasks = load_tasks()
     if idx < len(tasks):
         tasks.pop(idx)
         save_tasks(tasks)
+
 
 def add_task():
     if "new_task_input" in st.session_state:
@@ -60,8 +65,10 @@ def add_task():
                 if "add_task_error" in st.session_state:
                     del st.session_state.add_task_error
 
+
 def clear_tasks():
     save_tasks([])
+
 
 # Define the main function
 def main():
@@ -94,7 +101,7 @@ def main():
         }
         </style>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     # Set the title of the web app
@@ -119,25 +126,25 @@ def main():
     else:
         for i, task_item in enumerate(task_list):
             cols = st.columns([0.08, 0.77, 0.15])
-            
+
             # Checkbox for completion
             is_completed = task_item["status"] == "Completed"
             cols[0].checkbox(
-                "Complete task", 
-                value=is_completed, 
-                key=f"check_{i}", 
+                "Complete task",
+                value=is_completed,
+                key=f"check_{i}",
                 label_visibility="collapsed",
                 on_change=toggle_task,
-                args=(i,)
+                args=(i,),
             )
-            
+
             # Task text rendering
             task_name = task_item["task"]
             if is_completed:
                 cols[1].markdown(f"~~{task_name}~~")
             else:
                 cols[1].markdown(f"**{task_name}**")
-            
+
             # Handle task delete button via callback
             cols[2].button("🗑️", key=f"delete_{i}", on_click=delete_task, args=(i,))
 
@@ -153,10 +160,10 @@ def main():
     with st.form(key="add_task_form", clear_on_submit=True):
         col_input, col_submit = st.columns([0.8, 0.2])
         col_input.text_input(
-            "Add a new task:", 
+            "Add a new task:",
             placeholder="Type your task here...",
             label_visibility="collapsed",
-            key="new_task_input"
+            key="new_task_input",
         )
         st.form_submit_button("Add Task", on_click=add_task)
 
@@ -164,6 +171,7 @@ def main():
     if len(task_list) > 0:
         st.write("---")
         st.button("🧹 Clear all tasks", on_click=clear_tasks)
+
 
 # Run the app
 if __name__ == "__main__":
