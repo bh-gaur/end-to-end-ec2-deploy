@@ -1,6 +1,10 @@
 # pyrefly: ignore [missing-import]
 import streamlit as st
 import csv
+import os
+
+TestEnv = os.getenv("TestEnv")
+print("TestEnv", TestEnv)
 
 # Define the path to the CSV file
 CSV_FILE = "tasks.csv"
@@ -73,7 +77,7 @@ def clear_tasks():
 # Define the main function
 def main():
     # Set page configuration as the first Streamlit command
-    st.set_page_config(page_title="To-Do List", page_icon="📝", layout="centered")
+    st.set_page_config(page_title=f"To-Do List, {TestEnv}", page_icon="📝", layout="centered")
 
     # Set custom premium glassmorphic styling
     st.markdown(
