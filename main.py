@@ -165,8 +165,7 @@ def main():
             label_visibility="collapsed",
             key="new_task_input",
         )
-        st.
-        form_submit_button("Add Task", on_click=add_task)
+        st.form_submit_button("Add Task", on_click=add_task)
 
     # Add a button to clear the task list
     if len(task_list) > 0:
