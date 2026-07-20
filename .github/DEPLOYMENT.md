@@ -31,6 +31,10 @@ graph TD
     E --> F[Build Docker Image]
     F --> G[Run Trivy Security Scan]
     G -->|Passes Critical/High Check| H[Push Image to Docker Hub]
+    H --> I[Job: deploy]
+    I --> J[SSH into EC2]
+    J --> K[Pull Docker Image]
+    K --> L[Run Docker Compose]
 ```
 
 ### Pipeline Jobs Details
