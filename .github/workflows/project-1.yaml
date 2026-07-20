@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths: 
-      - 'project1/**'
+      - 'end-to-end-ec2-deploy/**'
 #   pull_request:
 #     branches:
 #       - main
