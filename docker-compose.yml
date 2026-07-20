@@ -1,0 +1,10 @@
+version: "3.8"
+ 
+services:
+  app:
+    image: ${DOCKERHUB_USERNAME}/todo-streamlit-app:${IMAGE_TAG}
+    container_name: todo-streamlit-app
+    restart: unless-stopped
+    ports:
+      - "80:8501"  
+  

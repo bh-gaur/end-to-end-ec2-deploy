@@ -2,9 +2,9 @@ name: Deploy to EC2    # name of the workflow
 
 on:               # when to trigger the workflow
   push:
-    branches: master
-    paths:        # when which path it will trigger
-      - "main.py"
+    branches: [ master ]
+    # paths:        # when which path it will trigger
+    #   - "main.py"
   workflow_dispatch: # allows us to trigger the workflow manually 
 
 env: # setting environment variables 
@@ -70,7 +70,7 @@ jobs: # jobs section contain multiple jobs that run in parallel
         with:
           context: .
           file: ./Dockerfile
-          push: false
+          push: false   ## To disable push to Docker Hub
           load: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/todo-streamlit-app:${{ env.IMAGE_TAG }}
           build-args: |
@@ -86,10 +86,35 @@ jobs: # jobs section contain multiple jobs that run in parallel
           severity: 'CRITICAL,HIGH'
 
       - name: Push Docker Image
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        run: |
+          docker push ${{ env.DOCKERHUB_USERNAME }}/todo-streamlit-app:${{ env.IMAGE_TAG }}
+
+  Deploy-to-EC2:
+    needs: Build-and-scan-image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Copy docker-compose.yml to EC2
+        uses: appleboy/scp-action@v0.1.7
         with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          load: false
-          tags: ${{ env.DOCKERHUB_USERNAME }}/todo-streamlit-app:${{ env.IMAGE_TAG }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "/home/${{ secrets.EC2_USER }}/app"
+
+      - name: SSH into EC2 and deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.EC2_USER }}/app
+            export DOCKERHUB_USERNAME=${{ env.DOCKERHUB_USERNAME }}
+            export IMAGE_TAG=${{ env.IMAGE_TAG }}
+            docker pull ${{ env.DOCKERHUB_USERNAME }}/todo-streamlit-app:${{ env.IMAGE_TAG }}
+            docker compose down
+            docker compose up -d
